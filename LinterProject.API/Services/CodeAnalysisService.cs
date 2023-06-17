@@ -80,7 +80,7 @@ namespace OnlineLinter.Services
         }
       }
 
-      return true; 
+      return true;
     }
   }
 }

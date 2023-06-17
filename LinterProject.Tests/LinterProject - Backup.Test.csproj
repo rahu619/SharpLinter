@@ -15,7 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../LinterProject/OnlineLinter.csproj" />
+    <ProjectReference Include="..\LinterProject.API\LinterProject.API.csproj" />
   </ItemGroup>
 
   <ItemGroup>
