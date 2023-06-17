@@ -1,0 +1,19 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace OnlineLinter.Test
+{
+	class SampleCode_2
+	{
+		public static void Main(string[] args)
+		{
+			Console.WriteLine("Starting application");
+
+			if (args.Any()) Console.WriteLine("No args found!");	
+			else Console.WriteLine(string.Join(",", args));
+		}
+	}
+}
