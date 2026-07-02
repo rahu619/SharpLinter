@@ -1,0 +1,16 @@
+{
+  "preset": "recommended",
+  "customRulesFile": ".sharplinter.rules.yaml",
+  "exclude": [
+    "**/bin/**",
+    "**/obj/**",
+    "**/artifacts/**",
+    "**/nupkg/**"
+  ],
+  "formatting": {
+    "enabled": true,
+    "indentSize": 4,
+    "useTabs": false,
+    "newLineForBraces": true
+  }
+}

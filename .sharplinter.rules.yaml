@@ -1,0 +1,37 @@
+# SharpLinter Custom Rules
+# Define your own rules here without writing C# analyzer code.
+
+rules:
+  # Example 1: Flag TODO or HACK comments in code
+  - id: "CUSTOM001"
+    title: "Clean up temporary comments"
+    description: "HACK, TODO, or FIXME comments should be resolved before committing code."
+    category: "Maintainability"
+    severity: "warning"
+    type: "pattern"
+    pattern:
+      kind: "comment"
+      match: "TODO|HACK|FIXME"
+
+  # Example 2: Limit method length to 40 lines
+  - id: "CUSTOM002"
+    title: "Method exceeds line limit"
+    description: "Methods should not exceed 40 lines. Consider decomposing complex logic."
+    category: "Maintainability"
+    severity: "suggestion"
+    type: "metric"
+    metric:
+      target: "method"
+      measure: "lines"
+      max: 40
+      
+  # Example 3: Ban public fields
+  - id: "CUSTOM003"
+    title: "Encapsulation violation"
+    description: "Public instance fields should be refactored to properties."
+    category: "Design"
+    severity: "warning"
+    type: "naming"
+    naming:
+      target: "field"
+      pattern: "^[a-z_][a-zA-Z0-9]*$" # camelCase fields should be private/protected
