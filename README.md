@@ -12,15 +12,15 @@ Unlike heavy build-time Roslyn analyzers or expensive enterprise tools like Sona
 
 ## Key Features
 
-- ⚡ **Lightning Fast:** Analyzes code structures using syntax-tree-only matching without full compilation overhead.
-- 📦 **Pluggable & Distributable:** Available as both a reusable NuGet library (`SharpLinter`) and a dotnet CLI tool (`SharpLinter.Cli`).
-- 🤖 **Online/Offline Rule Sync:** Syncs the latest Microsoft Code Analysis (CA/IDE) rules from Microsoft Learn, caching them locally.
-- 🛠️ **YAML-Based Custom Rules:** Create custom rules (regex patterns, metrics like method length/complexity, naming styles) with zero C# coding.
-- 📊 **Multi-Format Output:** Get results in human-readable console colors, JSON, standard **SARIF v2.1.0**, or **MSBuild native warning format**.
+- **Lightning Fast:** Analyzes code structures using syntax-tree-only matching without full compilation overhead.
+- **Pluggable & Distributable:** Available as both a reusable NuGet library (`SharpLinter`) and a dotnet CLI tool (`SharpLinter.Cli`).
+- **Online/Offline Rule Sync:** Syncs the latest Microsoft Code Analysis (CA/IDE) rules from Microsoft Learn, caching them locally.
+- **YAML-Based Custom Rules:** Create custom rules (regex patterns, metrics like method length/complexity, naming styles) with zero C# coding.
+- **Multi-Format Output:** Get results in human-readable console colors, JSON, standard **SARIF v2.1.0**, or **MSBuild native warning format**.
 
 ---
 
-## 🚀 Installation & Setup
+## Installation & Setup
 
 ### For CLI usage:
 ```bash
@@ -35,7 +35,7 @@ Add the NuGet package dependency:
 
 ---
 
-## 🛠️ CLI How-To & Commands
+## CLI Usage & Commands
 
 ### 1. Initialize Configuration
 Set up the default configuration file `.sharplinter.json` and a custom rules YAML template in your project root:
@@ -74,7 +74,7 @@ sharplinter sync
 
 ---
 
-## ⚡ MSBuild & IDE Integration How-To
+## MSBuild & IDE Integration
 
 You can trigger analysis automatically whenever anyone runs `dotnet build` (or builds within Visual Studio, Rider, or VS Code). Adding the following targets block to your `.csproj` automatically flags `SharpLinter` findings as native IDE compiler warnings:
 
@@ -97,7 +97,7 @@ $ dotnet build
 
 ---
 
-## 📦 Programmatic NuGet API How-To
+## Programmatic API Usage
 
 Consume the `SharpLinter.Core` library directly in your C# code to build custom linting pipelines:
 
@@ -126,7 +126,7 @@ string formattedCode = result.FormattedCode;
 
 ---
 
-## ✍️ Defining Custom Rules (`.sharplinter.rules.yaml`)
+## Defining Custom Rules (`.sharplinter.rules.yaml`)
 
 Add custom validation rules declaratively using YAML without writing C# compilation code:
 
@@ -168,7 +168,7 @@ rules:
 
 ---
 
-## ⚙️ Configuration Reference (`.sharplinter.json`)
+## Configuration Reference (`.sharplinter.json`)
 
 Configure rule behaviors, formatting constraints, and file filters:
 
