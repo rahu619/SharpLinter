@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Consume our packed NuGet package -->
+    <PackageReference Include="SharpLinter" Version="1.0.0" />
+  </ItemGroup>
+
+  <Target Name="RunSharpLinterAnalysis" BeforeTargets="Build">
+    <Message Importance="High" Text="🔍 Running SharpLinter Build-Time Analysis..." />
+    <Exec Command="dotnet run --project ../../src/SharpLinter.Cli -- analyze . --no-cache --format msbuild" IgnoreExitCode="true" />
+  </Target>
+
+</Project>
