@@ -31,9 +31,20 @@ public sealed class LintResult
         Diagnostics = diagnostics;
         Duration = duration;
         FormattedCode = formattedCode;
-        ErrorCount = diagnostics.Count(d => d.Severity == LintSeverity.Error);
-        WarningCount = diagnostics.Count(d => d.Severity == LintSeverity.Warning);
-        SuggestionCount = diagnostics.Count(d => d.Severity == LintSeverity.Suggestion);
+
+        int errors = 0, warnings = 0, suggestions = 0;
+        foreach (var d in diagnostics)
+        {
+            switch (d.Severity)
+            {
+                case LintSeverity.Error: errors++; break;
+                case LintSeverity.Warning: warnings++; break;
+                case LintSeverity.Suggestion: suggestions++; break;
+            }
+        }
+        ErrorCount = errors;
+        WarningCount = warnings;
+        SuggestionCount = suggestions;
     }
 
     /// <summary>True if any diagnostics with Error severity were found.</summary>

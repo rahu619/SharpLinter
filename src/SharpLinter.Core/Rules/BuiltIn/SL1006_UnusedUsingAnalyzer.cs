@@ -43,8 +43,8 @@ public sealed class SL1006_UnusedUsingAnalyzer : IRuleAnalyzer
         // Collect all identifiers used in the file (excluding the usings themselves)
         var allIdentifiers = root.DescendantTokens()
             .Where(t => t.IsKind(SyntaxKind.IdentifierToken)
-                     && t.Parent is not UsingDirectiveSyntax
-                     && t.Parent?.Parent is not UsingDirectiveSyntax)
+                     && t.Parent != null
+                     && !t.Parent.AncestorsAndSelf().OfType<UsingDirectiveSyntax>().Any())
             .Select(t => t.Text)
             .ToHashSet();
 

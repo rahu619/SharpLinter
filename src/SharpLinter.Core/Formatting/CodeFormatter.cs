@@ -1,3 +1,4 @@
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Formatting;
 using Microsoft.CodeAnalysis.Formatting;
@@ -7,19 +8,32 @@ namespace SharpLinter.Core.Formatting;
 
 /// <summary>
 /// Wraps Roslyn's code formatter with configurable options from SharpLinter configuration.
+/// Implements IDisposable to properly clean up the underlying Roslyn workspace.
 /// </summary>
-public sealed class CodeFormatter
+public sealed class CodeFormatter : IDisposable
 {
+    private readonly AdhocWorkspace _workspace = new();
+    private bool _disposed;
+
     /// <summary>
     /// Formats C# code according to the given configuration.
     /// </summary>
     public string Format(string code, LintConfiguration config)
     {
         var tree = CSharpSyntaxTree.ParseText(code);
-        var root = tree.GetRoot();
+        return Format(tree, config);
+    }
 
-        var workspace = new Microsoft.CodeAnalysis.AdhocWorkspace();
-        var options = workspace.Options
+    /// <summary>
+    /// Formats a pre-parsed syntax tree according to the given configuration.
+    /// Use this overload to avoid re-parsing code that has already been parsed.
+    /// </summary>
+    public string Format(SyntaxTree tree, LintConfiguration config)
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+
+        var root = tree.GetRoot();
+        var options = _workspace.Options
             .WithChangedOption(CSharpFormattingOptions.IndentBlock, true)
             .WithChangedOption(CSharpFormattingOptions.IndentBraces, false)
             .WithChangedOption(CSharpFormattingOptions.NewLineForCatch, true)
@@ -34,7 +48,16 @@ public sealed class CodeFormatter
             .WithChangedOption(CSharpFormattingOptions.SpaceAfterColonInBaseTypeDeclaration, true)
             .WithChangedOption(CSharpFormattingOptions.SpaceBeforeColonInBaseTypeDeclaration, true);
 
-        var formatted = Formatter.Format(root, workspace, options);
+        var formatted = Formatter.Format(root, _workspace, options);
         return formatted.ToFullString();
+    }
+
+    public void Dispose()
+    {
+        if (!_disposed)
+        {
+            _workspace.Dispose();
+            _disposed = true;
+        }
     }
 }

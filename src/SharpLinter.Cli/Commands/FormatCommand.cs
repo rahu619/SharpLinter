@@ -30,25 +30,9 @@ public static class FormatCommand
                 ? LintConfiguration.LoadFromFile(configPath)
                 : LintConfiguration.Discover(Path.GetFullPath(path));
 
-            var engine = new LintEngine(config);
+            using var engine = new LintEngine(config);
             var fullPath = Path.GetFullPath(path);
-            var files = new List<string>();
-
-            if (File.Exists(fullPath))
-            {
-                files.Add(fullPath);
-            }
-            else if (Directory.Exists(fullPath))
-            {
-                files.AddRange(Directory.EnumerateFiles(fullPath, "*.cs", SearchOption.AllDirectories)
-                    .Where(f => !f.Contains("/obj/") && !f.Contains("/bin/") && !f.Contains("\\obj\\") && !f.Contains("\\bin\\")));
-            }
-            else
-            {
-                Console.Error.WriteLine($"Error: Path '{path}' does not exist.");
-                Environment.ExitCode = 1;
-                return;
-            }
+            var files = FileDiscovery.DiscoverFiles(fullPath, config);
 
             int changedCount = 0;
 

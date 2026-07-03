@@ -172,4 +172,247 @@ public class AnalyzerTests
         diagnostics.Should().ContainSingle();
         diagnostics[0].RuleId.Should().Be("CUSTOM999");
     }
+
+    [Fact]
+    public async Task MethodLengthAnalyzer_ShouldFlagLongMethod()
+    {
+        // Arrange
+        var code = """
+            class TestClass
+            {
+                void Run()
+                {
+                    // 1
+                    // 2
+                    // 3
+                    // 4
+                    // 5
+                    // 6
+                    // 7
+                    // 8
+                    // 9
+                    // 10
+                }
+            }
+            """;
+
+        var config = CreateSingleRuleConfig("SL1004");
+        // Override maxLines to 5 for testing purposes
+        config.Rules["SL1004"].Options = new Dictionary<string, object> { { "maxLines", 5 } };
+        var engine = new LintEngine(config);
+
+        // Act
+        var result = await engine.AnalyzeCodeAsync(code);
+
+        // Assert
+        result.Diagnostics.Should().ContainSingle(d => d.RuleId == "SL1004");
+    }
+
+    [Fact]
+    public async Task NamingConventionAnalyzer_ShouldFlagNonPascalCaseClass()
+    {
+        // Arrange
+        var code = """
+            class testClass {}
+            """;
+
+        var config = CreateSingleRuleConfig("SL1005");
+        var engine = new LintEngine(config);
+
+        // Act
+        var result = await engine.AnalyzeCodeAsync(code);
+
+        // Assert
+        result.Diagnostics.Should().ContainSingle(d => d.RuleId == "SL1005" && d.Message.Contains("PascalCase"));
+    }
+
+    [Fact]
+    public async Task NamingConventionAnalyzer_ShouldFlagNonCamelCaseLocal()
+    {
+        // Arrange
+        var code = """
+            class TestClass
+            {
+                void Run()
+                {
+                    int MyVar = 10;
+                }
+            }
+            """;
+
+        var config = CreateSingleRuleConfig("SL1005");
+        var engine = new LintEngine(config);
+
+        // Act
+        var result = await engine.AnalyzeCodeAsync(code);
+
+        // Assert
+        result.Diagnostics.Should().ContainSingle(d => d.RuleId == "SL1005" && d.Message.Contains("camelCase"));
+    }
+
+    [Fact]
+    public async Task UnusedUsingAnalyzer_ShouldFlagUnusedUsing()
+    {
+        // Arrange
+        var code = """
+            using System.Text.RegularExpressions;
+            class TestClass
+            {
+                void Run()
+                {
+                    System.Console.WriteLine("No regex here");
+                }
+            }
+            """;
+
+        var config = CreateSingleRuleConfig("SL1006");
+        var engine = new LintEngine(config);
+
+        // Act
+        var result = await engine.AnalyzeCodeAsync(code);
+
+        // Assert
+        result.Diagnostics.Should().ContainSingle(d => d.RuleId == "SL1006" && d.Message.Contains("unused"));
+    }
+
+    [Fact]
+    public async Task CyclomaticComplexityAnalyzer_ShouldFlagComplexMethod()
+    {
+        // Arrange
+        var code = """
+            class TestClass
+            {
+                void Run(int x)
+                {
+                    if (x > 1) {
+                        if (x > 2) {
+                            if (x > 3) {
+                            }
+                        }
+                    }
+                }
+            }
+            """;
+
+        var config = CreateSingleRuleConfig("SL1007");
+        config.Rules["SL1007"].Options = new Dictionary<string, object> { { "maxComplexity", 2 } };
+        var engine = new LintEngine(config);
+
+        // Act
+        var result = await engine.AnalyzeCodeAsync(code);
+
+        // Assert
+        result.Diagnostics.Should().ContainSingle(d => d.RuleId == "SL1007");
+    }
+
+    [Fact]
+    public async Task ConsistentBracePlacementAnalyzer_ShouldFlagNonAllmanBracesByDefault()
+    {
+        // Arrange
+        var code = """
+            class TestClass {
+                void Run() 
+                {
+                }
+            }
+            """;
+
+        var config = CreateSingleRuleConfig("SL1008");
+        var engine = new LintEngine(config);
+
+        // Act
+        var result = await engine.AnalyzeCodeAsync(code);
+
+        // Assert
+        result.Diagnostics.Should().ContainSingle(d => d.RuleId == "SL1008");
+    }
+
+    [Fact]
+    public async Task TrailingWhitespaceAnalyzer_ShouldFlagTrailingWhitespace()
+    {
+        // Arrange
+        var code = "class TestClass \n{\n}\n"; // notice the space after TestClass
+
+        var config = CreateSingleRuleConfig("SL1009");
+        var engine = new LintEngine(config);
+
+        // Act
+        var result = await engine.AnalyzeCodeAsync(code);
+
+        // Assert
+        result.Diagnostics.Should().ContainSingle(d => d.RuleId == "SL1009");
+    }
+
+    [Fact]
+    public async Task FileLengthAnalyzer_ShouldFlagLongFile()
+    {
+        // Arrange
+        var code = "class TestClass {}\n\n\n\n\n\n\n"; // 8 lines
+
+        var config = CreateSingleRuleConfig("SL1010");
+        config.Rules["SL1010"].Options = new Dictionary<string, object> { { "maxLines", 5 } };
+        var engine = new LintEngine(config);
+
+        // Act
+        var result = await engine.AnalyzeCodeAsync(code);
+
+        // Assert
+        result.Diagnostics.Should().ContainSingle(d => d.RuleId == "SL1010");
+    }
+
+    [Fact]
+    public async Task PatternMatchingAnalyzer_ShouldFlagOldStyleCast()
+    {
+        // Arrange
+        var code = """
+            class TestClass
+            {
+                void Run(object x)
+                {
+                    if (x is string)
+                    {
+                        var s = (string)x;
+                    }
+                }
+            }
+            """;
+
+        var config = CreateSingleRuleConfig("SL1011");
+        var engine = new LintEngine(config);
+
+        // Act
+        var result = await engine.AnalyzeCodeAsync(code);
+
+        // Assert
+        result.Diagnostics.Should().ContainSingle(d => d.RuleId == "SL1011");
+    }
+
+    [Fact]
+    public async Task StringConcatInLoopAnalyzer_ShouldFlagConcatenationInLoop()
+    {
+        // Arrange
+        var code = """
+            class TestClass
+            {
+                void Run()
+                {
+                    string s = "";
+                    for (int i = 0; i < 10; i++)
+                    {
+                        s += "hello";
+                    }
+                }
+            }
+            """;
+
+        var config = CreateSingleRuleConfig("SL1012");
+        var engine = new LintEngine(config);
+
+        // Act
+        var result = await engine.AnalyzeCodeAsync(code);
+
+        // Assert
+        result.Diagnostics.Should().ContainSingle(d => d.RuleId == "SL1012");
+    }
 }
+

@@ -38,7 +38,7 @@ public static class AnalyzeCommand
                 config.RuleSync = new RuleSyncConfig { Enabled = false };
             }
 
-            var engine = new LintEngine(config);
+            using var engine = new LintEngine(config);
             var results = new List<LintResult>();
 
             if (File.Exists(path))

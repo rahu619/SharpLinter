@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Diagnostics;
 using Microsoft.CodeAnalysis.CSharp;
 using SharpLinter.Core.Configuration;
@@ -13,7 +14,7 @@ namespace SharpLinter.Core.Analysis;
 /// The main orchestrator for SharpLinter analysis.
 /// Coordinates rule discovery, configuration loading, file parsing, and diagnostic collection.
 /// </summary>
-public sealed class LintEngine
+public sealed class LintEngine : IDisposable
 {
     private readonly LintConfiguration _config;
     private readonly List<IRuleAnalyzer> _analyzers = [];
@@ -58,9 +59,6 @@ public sealed class LintEngine
 
         foreach (var analyzer in _analyzers)
         {
-            var severity = _config.GetEffectiveSeverity(analyzer.Metadata.RuleId, analyzer.Metadata.DefaultSeverity);
-            if (severity == LintSeverity.None) continue;
-
             try
             {
                 var results = analyzer.Analyze(tree, filePath, _config);
@@ -80,7 +78,7 @@ public sealed class LintEngine
         {
             try
             {
-                formattedCode = _formatter.Format(code, _config);
+                formattedCode = _formatter.Format(tree, _config);
             }
             catch (Exception)
             {
@@ -112,17 +110,16 @@ public sealed class LintEngine
     {
         await InitializeAsync(ct);
 
-        var files = DiscoverFiles(directoryPath);
-        var results = new List<LintResult>();
+        var files = FileDiscovery.DiscoverFiles(directoryPath, _config);
+        var results = new ConcurrentBag<LintResult>();
 
-        foreach (var file in files)
+        await Parallel.ForEachAsync(files, ct, async (file, token) =>
         {
-            ct.ThrowIfCancellationRequested();
-            var result = await AnalyzeFileAsync(file, ct);
+            var result = await AnalyzeFileAsync(file, token);
             results.Add(result);
-        }
+        });
 
-        return results;
+        return results.ToList();
     }
 
     /// <summary>
@@ -198,38 +195,8 @@ public sealed class LintEngine
         }
     }
 
-    private IReadOnlyList<string> DiscoverFiles(string directoryPath)
+    public void Dispose()
     {
-        if (!Directory.Exists(directoryPath))
-        {
-            // Maybe it's a single file
-            if (File.Exists(directoryPath) && directoryPath.EndsWith(".cs", StringComparison.OrdinalIgnoreCase))
-            {
-                return [directoryPath];
-            }
-            return [];
-        }
-
-        var allCsFiles = Directory.EnumerateFiles(directoryPath, "*.cs", SearchOption.AllDirectories);
-
-        return allCsFiles
-            .Where(f => !ShouldExclude(f, directoryPath))
-            .ToList();
-    }
-
-    private bool ShouldExclude(string filePath, string basePath)
-    {
-        var relativePath = Path.GetRelativePath(basePath, filePath).Replace('\\', '/');
-
-        foreach (var pattern in _config.Exclude)
-        {
-            var normalizedPattern = pattern.Replace("**/", "");
-            if (relativePath.Contains(normalizedPattern.Trim('*', '/')))
-            {
-                return true;
-            }
-        }
-
-        return false;
+        _formatter.Dispose();
     }
 }
