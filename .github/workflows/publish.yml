@@ -19,10 +19,10 @@ jobs:
       with:
         dotnet-version: '10.0.x'
 
-    # SharpLinter.ClientTest/nuget.config references a local package source at ../../nupkg.
-    # Create it so restore does not fail with NU1301 when the folder is missing.
-    - name: Ensure Local Package Source Exists
-      run: mkdir -p nupkg
+    # SharpLinter.ClientTest consumes SharpLinter as a NuGet package from a local source.
+    # Pack SharpLinter.Core first so the ClientTest project can restore successfully.
+    - name: Pack SharpLinter.Core for ClientTest
+      run: dotnet pack src/SharpLinter.Core/SharpLinter.Core.csproj --configuration Release -o nupkg
 
     - name: Restore Dependencies
       run: dotnet restore SharpLinter.slnx
@@ -52,8 +52,10 @@ jobs:
       with:
         dotnet-version: '10.0.x'
 
-    - name: Ensure Local Package Source Exists
-      run: mkdir -p nupkg
+    # SharpLinter.ClientTest consumes SharpLinter as a NuGet package from a local source.
+    # Pack SharpLinter.Core first so the ClientTest project can restore successfully.
+    - name: Pack SharpLinter.Core for ClientTest
+      run: dotnet pack src/SharpLinter.Core/SharpLinter.Core.csproj --configuration Release -o nupkg
 
     - name: Restore Dependencies
       run: dotnet restore SharpLinter.slnx
