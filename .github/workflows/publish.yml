@@ -39,7 +39,46 @@ jobs:
         name: nuget-packages-${{ github.ref_name }}
         path: nupkg/*.nupkg
 
-  publish:
+  publish-to-github-packages:
+    needs: build-pack-and-test
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+    - name: Checkout Source Code
+      uses: actions/checkout@v4
+
+    - name: Setup .NET SDK
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '10.0.x'
+
+    # SharpLinter.ClientTest consumes SharpLinter as a NuGet package from a local source.
+    # Pack SharpLinter.Core first so the ClientTest project can restore successfully.
+    - name: Pack SharpLinter.Core for ClientTest
+      run: dotnet pack src/SharpLinter.Core/SharpLinter.Core.csproj --configuration Release -o nupkg
+
+    - name: Restore Dependencies
+      run: dotnet restore SharpLinter.slnx
+
+    - name: Dotnet Build
+      run: dotnet build SharpLinter.slnx --configuration Release --no-restore
+
+    - name: Dotnet Pack
+      run: dotnet pack SharpLinter.slnx --configuration Release --no-build -o ./artifacts
+
+    # Publish packages to GitHub Packages so they appear on the repo's Packages page.
+    - name: Dotnet Push to GitHub Packages
+      run: |
+        dotnet nuget push ./artifacts/*.nupkg \
+          --source https://nuget.pkg.github.com/rahu619/index.json \
+          --api-key ${{ secrets.GITHUB_TOKEN }} \
+          --skip-duplicate
+
+  publish-to-nuget:
     needs: build-pack-and-test
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'

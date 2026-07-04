@@ -3,10 +3,7 @@
 [![Build, Pack, and Publish NuGet (main)](https://img.shields.io/github/actions/workflow/status/rahu619/SharpLinter/publish.yml?branch=main&label=main)](https://github.com/rahu619/SharpLinter/actions/workflows/publish.yml?query=branch%3Amain)
 [![Build, Pack, and Publish NuGet (develop)](https://img.shields.io/github/actions/workflow/status/rahu619/SharpLinter/publish.yml?branch=develop&label=develop)](https://github.com/rahu619/SharpLinter/actions/workflows/publish.yml?query=branch%3Adevelop)
 [![NuGet Version](https://img.shields.io/nuget/v/SharpLinter.svg)](https://www.nuget.org/packages/SharpLinter)
-[![NuGet Downloads](https://img.shields.io/nuget/dt/SharpLinter.svg)](https://www.nuget.org/packages/SharpLinter)
 [![License](https://img.shields.io/github/license/rahu619/SharpLinter.svg)](LICENSE)
-[![GitHub Issues](https://img.shields.io/github/issues/rahu619/SharpLinter.svg)](https://github.com/rahu619/SharpLinter/issues)
-[![GitHub Stars](https://img.shields.io/github/stars/rahu619/SharpLinter.svg)](https://github.com/rahu619/SharpLinter/stargazers)
 
 SharpLinter is a free, lightweight, syntax-tree-first C# linter and formatter. It runs fully offline with zero configuration required, but is highly customizable.
 
