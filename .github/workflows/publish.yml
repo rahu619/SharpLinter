@@ -7,7 +7,7 @@ on:
     branches: [ main, develop ]
 
 jobs:
-  build-and-test:
+  build-pack-and-test:
     runs-on: ubuntu-latest
 
     steps:
@@ -33,8 +33,14 @@ jobs:
     - name: Dotnet Test
       run: dotnet test SharpLinter.slnx --configuration Release --no-build --verbosity normal
 
+    - name: Upload NuGet Packages Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: nuget-packages-${{ github.ref_name }}
+        path: nupkg/*.nupkg
+
   publish:
-    needs: build-and-test
+    needs: build-pack-and-test
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
 
