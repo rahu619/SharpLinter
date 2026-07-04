@@ -2,11 +2,41 @@ name: Build, Pack, and Publish NuGet
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
 
 jobs:
-  deploy:
+  build-and-test:
     runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Source Code
+      uses: actions/checkout@v4
+
+    - name: Setup .NET SDK
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '10.0.x'
+
+    # SharpLinter.ClientTest/nuget.config references a local package source at ../../nupkg.
+    # Create it so restore does not fail with NU1301 when the folder is missing.
+    - name: Ensure Local Package Source Exists
+      run: mkdir -p nupkg
+
+    - name: Restore Dependencies
+      run: dotnet restore SharpLinter.slnx
+
+    - name: Dotnet Build
+      run: dotnet build SharpLinter.slnx --configuration Release --no-restore
+
+    - name: Dotnet Test
+      run: dotnet test SharpLinter.slnx --configuration Release --no-build --verbosity normal
+
+  publish:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
 
     # CRITICAL: Allows GitHub Actions to request an OIDC token for trusted publishing.
     permissions:
@@ -22,14 +52,14 @@ jobs:
       with:
         dotnet-version: '10.0.x'
 
+    - name: Ensure Local Package Source Exists
+      run: mkdir -p nupkg
+
     - name: Restore Dependencies
       run: dotnet restore SharpLinter.slnx
 
     - name: Dotnet Build
       run: dotnet build SharpLinter.slnx --configuration Release --no-restore
-
-    - name: Dotnet Test
-      run: dotnet test SharpLinter.slnx --configuration Release --no-build --verbosity normal
 
     - name: Dotnet Pack
       run: dotnet pack SharpLinter.slnx --configuration Release --no-build -o ./artifacts
