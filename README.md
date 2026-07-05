@@ -21,6 +21,21 @@ Unlike heavy build-time Roslyn analyzers or expensive enterprise tools like Sona
 
 ---
 
+## Dependencies
+
+SharpLinter integrates the following libraries to provide high-performance analysis and extensibility:
+
+*   **[Microsoft.CodeAnalysis.CSharp](https://www.nuget.org/packages/Microsoft.CodeAnalysis.CSharp)**
+    Provides the underlying Roslyn compiler platform APIs. Utilized exclusively for syntax-tree generation and traversal to ensure optimal performance without the overhead of full semantic compilation.
+*   **[YamlDotNet](https://www.nuget.org/packages/YamlDotNet)**
+    Facilitates the parsing and deserialization of declarative, user-defined rules from YAML configuration files.
+*   **[AngleSharp](https://www.nuget.org/packages/AngleSharp)**
+    Enables HTML parsing and DOM manipulation. Employed to synchronize and cache the latest Microsoft Code Analysis (CA/IDE) rules directly from Microsoft Learn documentation.
+*   **[System.CommandLine](https://www.nuget.org/packages/System.CommandLine)**
+    Serves as the foundational framework for building the `SharpLinter.Cli` global tool interface and command routing.
+
+---
+
 ## Installation & Setup
 
 ### For CLI usage:
